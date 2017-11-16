@@ -5,8 +5,9 @@
 #include <string>
 #include <queue>
 #include "map.h"
-#include "Player.h"
+#include "player.h"
 #include "bubble.h"
+#include "fssimplewindow.h"
 
 #define isFloor 0;
 #define isBox 1;
