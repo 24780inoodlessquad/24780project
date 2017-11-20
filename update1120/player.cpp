@@ -4,9 +4,67 @@ Player::Player(int px, int py, int num, int vel)
 {
     x = px;
     y = py;
-    v = vel;
-	BubbleNum = num;    
+	tool["life"]       = 0;
+	tool["num_bubble"] = 0;
+	tool["accelerate"] = 0;
+	tool["range"]      = 0;
+	fund_v = vel;
+    v = fund_v + 10*tool["accelarate"];
+	fund_BubbleNum = num;
+	BubbleNum = fund_BubbleNum + tool["num_bubble"];    
 	isInBubble = false;
+	fund_life = 1;
+	life = fund_life + tool["life"];
+	//std::unordered_map<std::string,int> temp({"life",0},{"num_bubble",0},{"speed",0},{"range",0});
+	//tool.at("life") = 0;
+	//tool.at("num_bubble") - 0;
+	//tool.at("speed") = 0;
+	//tool.at("range") = 0;
+}
+
+
+void Player::addTool(int toolType)
+{
+	switch (toolType)
+	{
+	case 1:
+		tool["life"]++;
+		break;
+	case 2:
+		tool["num_bubble"]++;
+		break;
+	case 3:
+		tool["accelerate"] += 2;
+		break;
+	case 4:
+		tool["range"]++;
+		break;
+	}
+}
+
+bool Player::getTool(Map &map)
+{
+	int bitx = this->getX() / 50;
+	int bity = this->getY() / 50;
+	if (map.getToolMapState(bity, bitx) != 0)
+	{ 
+		int state = map.getToolMapState(bitx, bity);
+ 		addTool(state);
+		update();
+		map.setToolState(bity, bitx, 0);
+		if(state == 4)
+		{
+			return true;
+		}
+	}
+	return false;
+}
+
+void Player::update()
+{
+	this->life = fund_life + tool["life"];
+	this->v    = fund_v    + tool["accelerate"];
+	this->BubbleNum = fund_BubbleNum + tool["num_bubble"];
 }
 
 void Player::incVelocity()
@@ -29,14 +87,20 @@ int Player::getBubbleNum() const
 	return BubbleNum;
 }
 
-void Player::layBubble(Map &map)
+void Player::layBubble(Map &map, int range)
 {
 	if(BubbleNum > 0)
 	{
 		map.setMapState(this->getY()/50,this->getX()/50, 4);
+		map.setBubbleMapRange(this->getY()/50,this->getX()/50,range);
 		BubbleNum--;
 		printf("%d	%d\n",this->getY(),this->getX());
 	}
+}
+
+void Player::plusNum(int num)
+{
+	this->BubbleNum += num;
 }
 
 int Player::getX() const

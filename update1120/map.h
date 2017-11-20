@@ -24,8 +24,15 @@ protected:
 	//map_state map[15][15];
 	int map[15][15];
     //to be implemented...
+
+
+
+	int toolmap[15][15];
+
+
+
 public:
-	Map()
+		Map()
 	{
 		for (int i = 0; i < 15; i++) 
 		{
@@ -36,7 +43,17 @@ public:
 				//map[i][j] = 0;
 			}
 		}
+		//added 11/19
+		for (int i = 0; i < 15; i++)
+		{
+			for (int j = 0; j < 15; j++)
+			{
+				toolmap[i][j] = 0;
+			}
+		}
 	}
+	//11/19 hesongl setToolState
+	void setToolState(int x, int y, int state);
 
 	/*Map(std::string fileName)
 	{
@@ -50,13 +67,25 @@ public:
 		}
 	}*/
 	void setPixel();
-	void setBubbleMap(int x, int y, int state);
+	void setBubbleMap(int x, int y, int state, int range, int layTime, int playerID);
+	//void setBubbleRange(const int x, const int y, const int range);
 	int  getPixel(int bitX, int bitY) const;
+	int getID(int x, int y);
 	void Draw();
 	//check whether the current bit map zone is exposed or not
 	void setMapState(int x, int y, int state);
+	void setBubbleMapRange(int x, int y, int range);
 	void checkExposeTime(); // traverse row and col
-	void adjacentExplode(int x, int y, int range);//recursion
+	void adjacentExplode(int x, int y, int range, int left, int right, int up, int down, int& num1, int& num2);//recursion
     int getMapState(int i, int j) const;
+	int getBubbleMapState(int i, int j) const;
+	int checkBubbleTime(int x, int y) const;
+	int getRange(int x, int y) const;
+	void setBlowTime(int x, int y);
+
+
+
+	int getToolMapState(int bitx, int bity);
+	void drawTool(int x, int y);
 };
 #endif

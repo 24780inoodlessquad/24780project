@@ -9,6 +9,7 @@ protected:
 	int blowTime;
 	int layTime;
 	int state; //0: inactive, 1 avtive
+	int firstTime;
 public:
 	Bubble(){bitx = 0; bity = 0; int state = 0;};
 	Bubble(int state, int pId, int xzone, int yzone, int lTime);
@@ -32,16 +33,20 @@ public:
 		layTime  = other.layTime;
 	}
 	void expose();
-	bool checkTime();
+	int checkTime() const;
 	void setBitX(int x);
 	void setBitY(int y);
 	void setState(int state);
+	void setLayTime(int layTime);
+	void setBlowTime0();
 	int getBitX() const;
 	int getBitY() const;
 	void increaseRange();
 	int getRange() const;
 	int getSate() const;
 	int getBlowTime();
+	int getPlayerID();
+	void setRange(const int r);
 	void tictoc();
 	~Bubble(){};
 	const Bubble& operator=(const Bubble& other)

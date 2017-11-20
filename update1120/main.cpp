@@ -4,6 +4,7 @@
 #include <vector>
 #include <string>
 #include <queue>
+#include <time.h>
 #include "map.h"
 #include "Player.h"
 #include "bubble.h"
@@ -19,6 +20,7 @@ using namespace std;
 
 int main(void)
 {
+	srand(time(nullptr));
 	Map background;
 	Player p1(75, 100, 3, 5);
 	Player p2(675, 700, 3, 5);
@@ -26,6 +28,7 @@ int main(void)
 	Bubble player2_bubble(0, 2, p2.getY()/50, p2.getX()/50, 100);
 	priority_queue<Bubble, vector<Bubble>, cmp> bubbleQueue;
 	vector<Bubble> bubbleVector;
+	int num1(0), num2(0);
 	char BitMap[] = {
 		"222222222222222"
 		"200011101110002"
@@ -64,11 +67,44 @@ int main(void)
 		printf("\n");
 	}
 
+
+
+		//11/19 hesongl temporarily set some tools for mapstate = 1
+	for (int i = 0; i < 15; ++i)
+	{
+		for (int j = 0; j < 15; ++j)
+		{
+			if (background.getMapState(i,j) == 1)
+			{
+				int state = rand() % 5; // 1: life 2: numbubble 3: speed 4:range 0: no state
+				//int state = 1;
+				background.setToolState(j, i, state);
+				if (state != 0)
+				{
+					cout << "tool on (" << i << "," << j << ") is : state" << endl;
+				}
+			}
+		}
+		printf("\n");
+	}
+
+
+
+
+
+
+
+
+
+
+
 	int P1Flag1 = 0, P1Flag2 = 0, P1Flag3 = 0, P1Flag4 = 0;
 	int P2Flag1 = 0, P2Flag2 = 0, P2Flag3 = 0, P2Flag4 = 0;
 	FsOpenWindow(16, 16, 750, 750, 2);
 	for (;;)
 	{
+		num1 = 0;
+		num2 = 0;
 		int direc = 0;
 		FsPollDevice();
 		auto key = FsInkey();
@@ -83,24 +119,40 @@ int main(void)
 			P1Flag1 = 1;
 			direc = 1;
 			p1.move(direc,background);
+			if(p1.getTool(background))
+			{
+				player1_bubble.increaseRange();
+			}
 		}
 		if (0 != FsGetKeyState(FSKEY_LEFT) && 0 == P1Flag1 && 0 == P1Flag3 && 0 == P1Flag4)
 		{
 			P1Flag2 = 1;
 			direc = 2;
 			p1.move(direc, background);
+			if(p1.getTool(background))
+			{
+				player1_bubble.increaseRange();
+			}
 		}
 		if (0 != FsGetKeyState(FSKEY_DOWN) && 0 == P1Flag1 && 0 == P1Flag2 && 0 == P1Flag4)
 		{
 			P1Flag3 = 1;
 			direc = 3;
 			p1.move(direc, background);
+			if(p1.getTool(background))
+			{
+				player1_bubble.increaseRange();
+			}
 		}
 		if (0 != FsGetKeyState(FSKEY_RIGHT) && 0 == P1Flag1 && 0 == P1Flag2 && 0 == P1Flag3)
 		{
 			P1Flag4 = 1;
 			direc = 4;
 			p1.move(direc, background);
+			if(p1.getTool(background))
+			{
+				player1_bubble.increaseRange();
+			}
 		}
 
 		if (0 == FsGetKeyState(FSKEY_UP) && 1 == P1Flag1)
@@ -121,14 +173,15 @@ int main(void)
 		}
 
 
-		if(key == FSKEY_SPACE)
+		if(key == FSKEY_SPACE && background.getBubbleMapState(p1.getY()/50, p1.getX()/50) != 1)
 		{
 			if(p1.getBubbleNum() > 0)
 			{
-				p1.layBubble(background); 
-			    player1_bubble.reset(0, 1, p1.getX()/50, p1.getY()/50, 100);
-			    background.setBubbleMap(p1.getY()/50, p1.getX()/50,1);
-			    bubbleVector.push_back(player1_bubble);
+				p1.layBubble(background, player1_bubble.getRange()); 
+			    //player1_bubble.reset(0, 1, p1.getX()/50, p1.getY()/50, 100);
+				//p1.layBubble(background); 
+				background.setBubbleMap(p1.getY()/50, p1.getX()/50,1, player1_bubble.getRange(),100,1);
+			    //bubbleVector.push_back(player1_bubble);
 			}
 		}
 
@@ -141,24 +194,28 @@ int main(void)
 			P2Flag1 = 1;
 			direc = 1;
 			p2.move(direc, background);
+			p2.getTool(background);
 		}
 		if (0 != FsGetKeyState(FSKEY_A) && 0 == P2Flag1 && 0 == P2Flag3 && 0 == P2Flag4)
 		{
 			P2Flag2 = 1;
 			direc = 2;
 			p2.move(direc, background);
+			p2.getTool(background);
 		}
 		if (0 != FsGetKeyState(FSKEY_S) && 0 == P2Flag1 && 0 == P2Flag2 && 0 == P2Flag4)
 		{
 			P2Flag3 = 1;
 			direc = 3;
 			p2.move(direc, background);
+			p2.getTool(background);
 		}
 		if (0 != FsGetKeyState(FSKEY_D) && 0 == P2Flag1 && 0 == P2Flag2 && 0 == P2Flag3)
 		{
 			P2Flag4 = 1;
 			direc = 4;
 			p2.move(direc, background);
+			p2.getTool(background);
 		}
 
 		if (0 == FsGetKeyState(FSKEY_W) && 1 == P2Flag1)
@@ -177,28 +234,57 @@ int main(void)
 		{
 			P2Flag4 = 0;
 		}
-		if(key == FSKEY_ENTER)
+		if(key == FSKEY_ENTER && background.getBubbleMapState(p2.getY()/50, p2.getX()/50) != 1)
 		{
 			if(p2.getBubbleNum() > 0)
 			{
-				p2.layBubble(background);
-			    player2_bubble.reset(0, 2, p2.getX()/50, p2.getY()/50, 100);
-			    background.setBubbleMap(p2.getY()/50, p2.getX()/50,1);
-			    bubbleVector.push_back(player2_bubble);
+				p2.layBubble(background,player1_bubble.getRange());
+			    //player2_bubble.reset(0, 2, p2.getX()/50, p2.getY()/50, 100);
+				//p2.layBubble(background); 
+				//background.setBubbleRange(p2.getX()/50, p2.getY()/50,player1_bubble.getRange());
+				//background.setBubbleMap(p2.getY()/50, p2.getX()/50,1, player2_bubble.getRange());
+				background.setBubbleMap(p2.getY()/50, p2.getX()/50,1, player1_bubble.getRange(),100,2);
+			    //bubbleVector.push_back(player2_bubble);
 			}
 		}
 
 
-		for(int i=0;i<bubbleVector.size();++i)
+		/*for(int i=0;i<bubbleVector.size();++i)
 		{
 			bubbleVector[i].tictoc();
 			if(bubbleVector[i].checkTime())
 			{
-				background.setMapState(bubbleVector[i].getBitY(),bubbleVector[i].getBitX(),0);
+				background.setMapState(bubbleVector[i].getBitY(),bubbleVector[i].getBitX(),3);
 				background.adjacentExplode(bubbleVector[i].getBitY(), bubbleVector[i].getBitX(), bubbleVector[i].getRange());
 				bubbleVector.erase(bubbleVector.begin() + i);
 			}
+		}*/
+
+		for(int i=0;i<15;++i)
+		{
+			for(int j=0;j<15;++j)
+			{
+				background.setBlowTime(i,j);
+				if(background.getBubbleMapState(i,j) == 1 && background.checkBubbleTime(i,j) == true)
+				{
+					background.setMapState(i,j,3);
+					background.adjacentExplode(i, j, background.getRange(i,j),1,1,1,1, num1, num2);
+					/*if(background.getID(i,j) == 1)
+					{
+						p1.plusNum();
+					}
+					else if(background.getID(i,j) == 2)
+					{
+						p2.plusNum();
+					}*/
+					background.setBubbleMap(i,j,0,3,100,0);
+					//background.adjacentExplode(i, j, background.getRange(i,j),1,1,1,1);
+				}
+			}
 		}
+		p1.plusNum(num1++);
+		
+		p2.plusNum(num2++);
 
 
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
@@ -206,7 +292,7 @@ int main(void)
 		p1.Draw();
 		p2.Draw();
 		FsSwapBuffers();
-		FsSleep(20);
+		FsSleep(15);
 
 		for(int i=0;i<15;++i)
 		{
@@ -215,6 +301,7 @@ int main(void)
 				if(background.getMapState(i,j) == 3)
 				{
 					background.setMapState(j,i,0);
+					background.setBubbleMap(j,i,0,3,100,0);
 				}
 			}
 		}
